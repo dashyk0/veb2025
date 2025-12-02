@@ -1,14 +1,10 @@
-
-
-/* Сетка карточек блюд — 3 колонки на десктопе*/
 .dishes-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;                    /* специально 10px — как в макете */
+    gap: 10px;
     margin-top: 40px;
 }
 
-/* Одна карточка блюда */
 .dish {
     background: white;
     border-radius: 35px;
@@ -21,7 +17,6 @@
     text-align: center;
 }
 
-/* Картинка в карточке */
 .dish img {
     width: 100%;
     height: 220px;
@@ -30,32 +25,10 @@
     margin-bottom: 20px;
 }
 
-/* Цена — самый заметный элемент */
-.dish .price {
-    font-size: 28px;
-    font-weight: 700;
-    color: tomato;
-    margin: 12px 0 8px;
-}
+.dish .price { font-size: 28px; font-weight: 700; color: tomato; margin: 12px 0 8px; }
+.dish .title { font-size: 21px; font-weight: 600; color: #333; flex-grow: 1; min-height: 60px; }
+.dish .weight { font-size: 16px; color: #888; margin-top: auto; margin-bottom: 18px; }
 
-/* Название блюда — растягивается, чтобы карточки были одинаковой высоты */
-.dish .title {
-    font-size: 21px;
-    font-weight: 600;
-    color: #333;
-    flex-grow: 1;
-    min-height: 60px;
-}
-
-/* Вес/объём */
-.dish .weight {
-    font-size: 16px;
-    color: #888;
-    margin-top: auto;
-    margin-bottom: 18px;
-}
-
-/* Кнопка "Добавить" */
 .dish .add-btn {
     background: #f1eee9;
     color: #333;
@@ -69,17 +42,16 @@
     align-self: center;
 }
 
-/* Эффекты при наведении на карточку */
 .dish:hover {
     border: 2px solid tomato;
     transform: translateY(-10px);
 }
+
 .dish:hover .add-btn {
     background: tomato;
     color: white;
 }
 
-/* Заголовки разделов (Выберите суп / главное блюдо / напиток) */
 section h2 {
     font-size: 36px;
     text-align: center;
@@ -87,7 +59,6 @@ section h2 {
     color: #333;
 }
 
-/* Блок с формой заказа — белый с тенью */
 .order-form-section {
     margin: 80px 0;
     background: white;
@@ -96,8 +67,7 @@ section h2 {
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-
-/* Две колонки формы */
+/* ──────── СТИЛИ ФОРМЫ (как в макете) ──────── */
 .form-columns {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -105,12 +75,8 @@ section h2 {
     margin-top: 30px;
 }
 
-/* Отступы между полями */
-.form-group {
-    margin-bottom: 20px;
-}
+.form-group { margin-bottom: 20px; }
 
-/* Подписи к полям */
 .form-group label {
     display: block;
     margin-bottom: 8px;
@@ -118,7 +84,6 @@ section h2 {
     color: #333;
 }
 
-/* Поля ввода, селекты, текстэрия */
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -130,6 +95,7 @@ section h2 {
     font-size: 16px;
     transition: border 0.3s;
 }
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
@@ -137,52 +103,21 @@ section h2 {
     border-color: tomato;
 }
 
-/* Текстэрия */
-textarea {
-    resize: vertical;
-    min-height: 110px;
-}
+textarea { resize: vertical; min-height: 110px; }
 
-/* Радиокнопки — вертикально */
 .radio-group {
     display: flex;
     flex-direction: column;
     gap: 12px;
     margin-top: 10px;
 }
+
 .radio-option {
     display: flex;
     align-items: center;
-    gap: 12px;
-}
-.radio-option label {
-    margin-bottom: 0;
-    cursor: pointer;
-    font-weight: normal;
+    gap: 10px;
 }
 
-/* Чекбокс подписки — галочка рядом с текстом */
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.checkbox-label {
-    margin-bottom: 0;
-    cursor: pointer;
-    font-weight: normal;
-}
-
-/* Красивые чекбоксы и радиокнопки */
-input[type="checkbox"],
-input[type="radio"] {
-    width: 20px;
-    height: 20px;
-    accent-color: tomato;
-    cursor: pointer;
-}
-
-/* Кнопки внизу формы */
 .form-buttons {
     margin-top: 40px;
     text-align: center;
@@ -190,6 +125,7 @@ input[type="radio"] {
     gap: 20px;
     justify-content: center;
 }
+
 .btn-reset, .btn-submit {
     padding: 16px 44px;
     font-size: 18px;
@@ -199,48 +135,95 @@ input[type="radio"] {
     font-family: 'Comfortaa', cursive;
     transition: 0.3s;
 }
+
 .btn-reset {
     background: #f1eee9;
     color: #333;
     border: none;
 }
+
 .btn-reset:hover { background: #e0d9d0; }
+
 .btn-submit {
     background: tomato;
     color: white;
     border: none;
 }
+
 .btn-submit:hover { background: #e55a2b; }
 
-/* Мелкий текст-подсказка */
-.form-note {
-    color: #888;
-    font-size: 14px;
-}
+.form-note { color: #888; font-size: 14px; }
 
-
+/* Адаптив */
 @media (max-width: 900px) {
-    .form-columns { grid-template-columns: 1fr; } /* форма в одну колонку */
+    .form-columns { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 800px) {
-    .dishes-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 25px;
-    }
+    .dishes-grid { grid-template-columns: repeat(2, 1fr); gap: 25px; }
     .nav ul { justify-content: space-between; }
 }
 
 @media (max-width: 600px) {
-    .dishes-grid { grid-template-columns: 1fr; } /* одна колонка на телефоне */
+    .dishes-grid { grid-template-columns: 1fr; }
     h1 { font-size: 32px; }
     header .container { flex-direction: column; }
-    .nav ul {
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-    }
+    .nav ul { flex-direction: column; align-items: center; gap: 12px; }
     .nav a { font-size: 22px; padding: 12px 20px; }
     .dish { padding: 25px 30px; }
     .dish img { height: 200px; }
+}
+/* Галочка рядом с текстом */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.checkbox-label {
+    margin-bottom: 0 !important;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+/* Красивые радиокнопки */
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.radio-option label {
+    margin-bottom: 0;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    accent-color: tomato;
+    cursor: pointer;
+}
+.filters {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.filter-btn {
+    background: #f0f0f0;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 8px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-family: 'Comfortaa', cursive;
+    transition: 0.3s;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: tomato;
+    color: white;
 }
