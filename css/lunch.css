@@ -67,7 +67,6 @@ section h2 {
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-/* ──────── СТИЛИ ФОРМЫ (как в макете) ──────── */
 .form-columns {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -226,4 +225,159 @@ input[type="radio"] {
 .filter-btn:hover {
     background: tomato;
     color: white;
+}
+.lunch-variants {
+    margin: 80px 0;
+    text-align: center;
+}
+.lunch-variants {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 80px 0 !important;
+}
+
+.lunch-variants > .container {
+    background: white;
+    padding: 50px 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.07)
+    text-align: center;
+}
+.lunch-variants h2 {
+    font-size: 36px;
+    color: #333;
+    margin: 60px 0 20px;
+}
+
+.variants-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.variant {
+    background: white;
+    border-radius: 35px;
+    padding: 30px;
+    filter: drop-shadow(17px 19px 24px rgba(0, 0, 0, 0.13));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.variant:hover {
+    transform: translateY(-10px);
+}
+
+.variant-items {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.variant-dish {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.variant-dish img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.variant-dish img:hover {
+    transform: translateY(-5px) scale(1.1);
+}
+
+.variant-dish span {
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+}
+
+.dessert-variant {
+    justify-content: center;
+}
+
+.dessert-note {
+    font-size: 12px;
+    color: #888;
+    margin-top: 10px;
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .variants-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .variants-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.notification {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.notification-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    max-width: 500px;
+    animation: popup 0.4s ease;
+}
+
+.notification-content p {
+    font-size: 22px;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+.notification-btn {
+    background: #ff6b35;
+    color: white;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.notification-btn:hover {
+    background: #e55a2b;
+    transform: scale(1.05);
+}
+
+@keyframes popup {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.add-btn.remove {
+    background: #ff6b35;
+    color: white;
+}
+
+.add-btn.remove:hover {
+    background: #e55a2b;
 }

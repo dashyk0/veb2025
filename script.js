@@ -87,27 +87,42 @@ function displayDishes() {
 
     // Делегируем клики по кнопкам "Добавить" один раз
     document.body.addEventListener('click', e => {
-        if (e.target.classList.contains('add-btn')) {
-            const dishEl = e.target.closest('.dish');
-            if (!dishEl) return;
-            const keyword = dishEl.dataset.dish;
-            const dish = dishes.find(d => d.keyword === keyword);
-            if (dish) {
-                selectedDishes[dish.category] = dish;
-                updateOrderSection();
+    if (e.target.classList.contains('add-btn')) {
+        const dishEl = e.target.closest('.dish');
+        if (!dishEl) return;
 
-                // Визуальная обратная связь
-                e.target.textContent = 'Добавлено!';
-                e.target.disabled = true;
-                setTimeout(() => {
-                    if (e.target.isConnected) {
-                        e.target.textContent = 'Добавить';
-                        e.target.disabled = false;
-                    }
-                }, 800);
-            }
+        const keyword = dishEl.dataset.dish;
+        const dish = dishes.find(d => d.keyword === keyword);
+        if (!dish) return;
+
+        const category = dish.category;
+
+        // Если это блюдо уже выбрано — убираем, иначе добавляем
+        if (selectedDishes[category]?.keyword === dish.keyword) {
+            // Убираем
+            selectedDishes[category] = null;
+            e.target.textContent = 'Добавить';
+            e.target.classList.remove('remove');
+        } else {
+            // Добавляем (снимаем старое из этой категории)
+            selectedDishes[category] = dish;
+            e.target.textContent = 'Убрать';
+            e.target.classList.add('remove');
+
+            // Если в этой категории было другое блюдо — обновляем его кнопку
+            const previousDish = dishes.find(d => 
+                d.category === category && 
+                d.keyword !== keyword && 
+                selectedDishes[category]?.keyword !== d.keyword
+            );
+            // (необязательно, но можно обновить все кнопки в категории)
         }
-    });
+
+        updateOrderSection();
+        // Перерисовываем только эту категорию, чтобы кнопки обновились
+        renderCategory(category);
+    }
+});
 }
 
 function renderCategory(cat) {
@@ -132,18 +147,24 @@ function renderCategory(cat) {
     }
 
     filtered.forEach(dish => {
-        const el = document.createElement('div');
-        el.className = 'dish';
-        el.dataset.dish = dish.keyword;
-        el.innerHTML = `
-            <img src="${dish.image}" alt="${dish.name}">
-            <p class="price">${dish.price} ₽</p>
-            <p class="title">${dish.name}</p>
-            <p class="weight">${dish.count}</p>
-            <button class="add-btn">Добавить</button>
-        `;
-        grid.appendChild(el);
-    });
+    const el = document.createElement('div');
+    el.className = 'dish';
+    el.dataset.dish = dish.keyword;
+
+    // Определяем, выбрано ли уже это блюдо
+    const isSelected = selectedDishes[dish.category]?.keyword === dish.keyword;
+
+    el.innerHTML = `
+        <img src="${dish.image}" alt="${dish.name}">
+        <p class="price">${dish.price} ₽</p>
+        <p class="title">${dish.name}</p>
+        <p class="weight">${dish.count}</p>
+        <button class="add-btn ${isSelected ? 'remove' : ''}">
+            ${isSelected ? 'Убрать' : 'Добавить'}
+        </button>
+    `;
+    grid.appendChild(el);
+});
 }
 
 function updateOrderSection() {
@@ -182,4 +203,98 @@ function updateOrderSection() {
 document.addEventListener('DOMContentLoaded', () => {
     displayDishes();
     updateOrderSection();
+});
+
+// === ВАЛИДАЦИЯ ЛАНЧА И УВЕДОМЛЕНИЯ ===
+const validCombos = [
+    ['soup', 'main', 'salad', 'drink'],
+    ['soup', 'main', 'drink'],
+    ['soup', 'salad', 'drink'],
+    ['main', 'salad', 'drink'],
+    ['main', 'drink']
+];
+
+function showNotification(message) {
+    // Удаляем старое уведомление, если есть
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <p>${message}</p>
+            <button class="notification-btn">Окей</button>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Клик по кнопке — закрыть
+    notification.querySelector('.notification-btn').addEventListener('click', () => {
+        notification.remove();
+    });
+
+    // Клик вне уведомления — тоже закрыть
+    notification.addEventListener('click', (e) => {
+        if (e.target === notification) notification.remove();
+    });
+}
+
+function validateLunch() {
+    const selected = Object.keys(selectedDishes)
+        .filter(cat => selectedDishes[cat] !== null && cat !== 'dessert'); // десерт не обязателен
+
+    // Если вообще ничего не выбрано (кроме возможно десерта)
+    if (selected.length === 0) {
+        showNotification('Ничего не выбрано. Выберите блюда для заказа');
+        return false;
+    }
+
+    // Проверяем, есть ли напиток — он обязателен во всех комбо
+    if (!selected.includes('drink')) {
+        showNotification('Выберите напиток');
+        return false;
+    }
+
+    // Теперь проверяем наличие хотя бы одного "основного" блюда
+    const hasMain = selected.includes('main');
+    const hasSoup = selected.includes('soup');
+    const hasSalad = selected.includes('salad');
+
+    // Допустимые комбо (без десерта):
+    // 1. soup + main + salad + drink
+    // 2. soup + main + drink
+    // 3. soup + salad + drink
+    // 4. main + salad + drink
+    // 5. main + drink
+
+    const isValidCombo =
+        (hasMain && hasDrink) ||                                                        // минимум главное + напиток
+        (hasSoup && hasMain && selected.includes('drink')) ||                           // суп + главное + напиток
+        (hasSoup && hasSalad && selected.includes('drink')) ||                          // суп + салат + напиток
+        (hasMain && hasSalad && selected.includes('drink'));                            // главное + салат + напиток
+
+    if (!isValidCombo) {
+        // Определяем, чего конкретно не хватает
+        if (hasSoup && !hasMain && !hasSalad) {
+            showNotification('К супу добавьте главное блюдо или салат/стартер');
+        } else if (!hasSoup && !hasMain && hasSalad) {
+            showNotification('К салату/стартеру добавьте суп или главное блюдо');
+        } else if (!hasMain) {
+            showNotification('Выберите главное блюдо');
+        } else {
+            showNotification('Ваш набор не соответствует доступным комбо-ланчам');
+        }
+        return false;
+    }
+
+    return true;
+}
+
+// Подключаем валидацию к форме
+document.querySelector('.order-form').addEventListener('submit', function(e) {
+    if (!validateLunch()) {
+        e.preventDefault();
+    }
 });
