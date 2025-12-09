@@ -1,5 +1,5 @@
 
-let dishes = []; // Теперь глобальный массив будет заполняться с сервера
+let dishes = [];                     // сюда загрузятся блюда с сервера
 let selectedDishes = {
     soup: null,
     main: null,
@@ -8,7 +8,7 @@ let selectedDishes = {
     dessert: null
 };
 
-let currentFilters = {};
+let currentFilters = {};             // текущие активные фильтры по категориям
 
 const categoryNames = {
     soup: 'Суп',
@@ -29,133 +29,105 @@ const kindNames = {
     large: 'Большая порция'
 };
 
-// === ФУНКЦИЯ ЗАГРУЗКИ БЛЮД С API ===
+
 async function loadDishes() {
     try {
         const response = await fetch('https://edu.std-900.ist.mospolytech.ru/labs/api/dishes');
-        
+
         if (!response.ok) {
-            throw new Error(`Ошибка HTTP: ${response.status}`);
+            throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
 
-        // Приводим данные к нужному формату (если API отдаёт не совсем как раньше)
-        dishes = data.map(dish => ({
-            keyword: dish.keyword,
-            name: dish.name,
-            price: dish.price,
-            category: dish.category,
-            count: dish.count || '—',
-            image: dish.image || 'img/no-photo.jpg', // на случай, если нет фото
-            kind: dish.kind
+        dishes = data.map(d => ({
+            keyword: d.keyword,
+            name: d.name,
+            price: d.price,
+            category: d.category,
+            count: d.count || '—',
+            image: d.image || 'img/no-photo.jpg',
+            kind: d.kind
         }));
 
-        console.log('Блюда успешно загружены:', dishes.length);
-        displayDishes(); // Перерисовываем всё после загрузки
+        console.log('Блюда загружены:', dishes.length);
+        displayDishes();
         updateOrderSection();
-    } catch (error) {
-        console.error('Ошибка загрузки блюд:', error);
-        showNotification('Не удалось загрузить меню. Проверьте подключение к интернету.');
+    } catch (err) {
+        console.error('Ошибка загрузки меню:', err);
+        showNotification('Не удалось загрузить меню. Проверьте интернет-соединение.');
     }
 }
 
-// === Остальные функции (без изменений, только мелкие правки под динамические данные) ===
-
+/* Отрисовка всех категорий и фильтров */
 function displayDishes() {
     const categories = ['soup', 'main', 'drink', 'salad', 'dessert'];
 
     categories.forEach(cat => {
         const grid = document.getElementById(cat + '-grid');
         const filterBar = document.getElementById(cat + '-filters');
-
         if (!grid) return;
 
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #888;">Загрузка блюд...</p>';
+        // пока блюда ещё не отрисованы – показываем «загрузка»
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#888;">Загрузка...</p>';
         if (filterBar) filterBar.innerHTML = '';
 
-        // Создаём фильтры
-        const kindsInCategory = [...new Set(
-            dishes.filter(d => d.category === cat).map(d => d.kind)
-        )];
+        //ФИЛЬТРЫ
+        const kinds = [...new Set(dishes.filter(d => d.category === cat).map(d => d.kind))];
 
-        if (filterBar && kindsInCategory.length > 0) {
+        if (filterBar && kinds.length > 0) {
+            // кнопка «Все»
             const allBtn = document.createElement('button');
             allBtn.textContent = 'Все';
             allBtn.className = 'filter-btn active';
             allBtn.dataset.kind = 'all';
             filterBar.appendChild(allBtn);
 
-            kindsInCategory.forEach(kind => {
+            kinds.forEach(k => {
                 const btn = document.createElement('button');
-                btn.textContent = kindNames[kind] || kind;
+                btn.textContent = kindNames[k] || k;
                 btn.className = 'filter-btn';
-                btn.dataset.kind = kind;
+                btn.dataset.kind = k;
                 filterBar.appendChild(btn);
             });
 
             filterBar.addEventListener('click', e => {
                 const btn = e.target.closest('.filter-btn');
                 if (!btn) return;
-
                 filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
 
                 const kind = btn.dataset.kind;
-                currentFilters[cat] = kind === 'all' ? null : kind;
+                currentFilters[cat] = (kind === 'all') ? null : kind;
                 renderCategory(cat);
             });
         }
 
         renderCategory(cat);
     });
-
-    // Обработчик добавления/удаления блюд
-    document.body.addEventListener('click', e => {
-        if (e.target.classList.contains('add-btn')) {
-            const dishEl = e.target.closest('.dish');
-            if (!dishEl) return;
-
-            const keyword = dishEl.dataset.dish;
-            const dish = dishes.find(d => d.keyword === keyword);
-            if (!dish) return;
-
-            const category = dish.category;
-
-            if (selectedDishes[category]?.keyword === dish.keyword) {
-                // Убираем
-                selectedDishes[category] = null;
-            } else {
-                // Добавляем (заменяем старое в категории)
-                selectedDishes[category] = dish;
-            }
-
-            updateOrderSection();
-            renderCategory(category); // обновляем кнопки в категории
-        }
-    });
 }
 
+/* Отрисовка одной категории*/
 function renderCategory(cat) {
     const grid = document.getElementById(cat + '-grid');
     if (!grid) return;
 
-    let filtered = dishes.filter(d => d.category === cat);
+    let list = dishes.filter(d => d.category === cat);
 
     if (currentFilters[cat]) {
-        filtered = filtered.filter(d => d.kind === currentFilters[cat]);
+        list = list.filter(d => d.kind === currentFilters[cat]);
     }
 
-    filtered.sort((a, b) => a.name.localeCompare(b.name));
+    list.sort((a, b) => a.name.localeCompare(b.name));
 
     grid.innerHTML = '';
 
-    if (filtered.length === 0) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #888; padding: 40px 20px;">Нет блюд в этой категории или по выбранному фильтру</p>';
+    if (list.length === 0) {
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#888;padding:40px 20px;">Нет блюд по выбранному фильтру</p>';
         return;
     }
 
-    filtered.forEach(dish => {
+    list.forEach(dish => {
         const isSelected = selectedDishes[dish.category]?.keyword === dish.keyword;
 
         const el = document.createElement('div');
@@ -174,6 +146,32 @@ function renderCategory(cat) {
     });
 }
 
+/* Обработчик добавления / удаления блюда*/
+document.body.addEventListener('click', e => {
+    if (!e.target.classList.contains('add-btn')) return;
+
+    const dishEl = e.target.closest('.dish');
+    if (!dishEl) return;
+
+    const keyword = dishEl.dataset.dish;
+    const dish = dishes.find(d => d.keyword === keyword);
+    if (!dish) return;
+
+    const cat = dish.category;
+
+    if (selectedDishes[cat]?.keyword === dish.keyword) {
+        // уже выбрано → убираем
+        selectedDishes[cat] = null;
+    } else {
+        // выбираем (заменяем предыдущее в категории)
+        selectedDishes[cat] = dish;
+    }
+
+    updateOrderSection();
+    renderCategory(cat);          // обновляем кнопки в категории
+});
+
+/* Обновление блока «Ваш заказ»*/
 function updateOrderSection() {
     const container = document.getElementById('order-dishes');
     const totalEl = document.getElementById('order-total');
@@ -201,75 +199,95 @@ function updateOrderSection() {
     });
 
     if (!hasAny) {
-        container.innerHTML = '<p style="text-align: center; color: #888; padding: 30px;">Корзина пуста</p>';
+        container.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">Корзина пуста</p>';
         totalEl.innerHTML = '';
     } else {
-        totalEl.innerHTML = `<p style="color: #ff6b35; font-size: 26px;"><strong>Итого: ${total} ₽</strong></p>`;
+        totalEl.innerHTML = `<p style="color:#ff6b35;font-size:26px;"><strong>Итого: ${total} ₽</strong></p>`;
     }
 }
 
+/* Уведомления */
 function showNotification(message) {
-    const existing = document.querySelector('.notification');
-    if (existing) existing.remove();
+    const old = document.querySelector('.notification');
+    if (old) old.remove();
 
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.innerHTML = `
+    const notif = document.createElement('div');
+    notif.className = 'notification';
+    notif.innerHTML = `
         <div class="notification-content">
             <p>${message}</p>
             <button class="notification-btn">Понятно</button>
         </div>
     `;
-    document.body.appendChild(notification);
+    document.body.appendChild(notif);
 
-    notification.addEventListener('click', e => {
-        if (e.target === notification || e.target.classList.contains('notification-btn')) {
-            notification.remove();
+    notif.addEventListener('click', e => {
+        if (e.target === notif || e.target.classList.contains('notification-btn')) {
+            notif.remove();
         }
     });
 }
 
-// Валидация заказа (без изменений)
-const validCombos = [
-    ['soup', 'main', 'salad', 'drink'],
-    ['soup', 'main', 'drink'],
-    ['soup', 'salad', 'drink'],
-    ['main', 'salad', 'drink'],
-    ['main', 'drink']
-];
-
+/*Валидация состава ланча*/
 function validateLunch() {
-    const selected = Object.keys(selectedDishes).filter(cat => selectedDishes[cat] !== null && cat !== 'dessert');
+    const selected = Object.keys(selectedDishes)
+        .filter(cat => selectedDishes[cat] !== null && cat !== 'dessert');
 
     if (selected.length === 0) {
         showNotification('Вы ничего не выбрали');
         return false;
     }
-
     if (!selected.includes('drink')) {
         showNotification('Обязательно выберите напиток');
         return false;
     }
-
     const hasMain = selected.includes('main');
     const hasSoup = selected.includes('soup');
-    const hasSalad = selected.includes('salad');
-
     if (!hasMain && !hasSoup) {
         showNotification('Выберите суп или главное блюдо');
         return false;
     }
-
     return true;
 }
 
-// Запуск загрузки при открытии страницы
+/* Запуск всего после загрузки страницы*/
 document.addEventListener('DOMContentLoaded', () => {
-    loadDishes(); // ← Главное — запускаем загрузку с API
+    loadDishes();                       // загружаем блюда с сервера
 
-    document.querySelector('.order-form')?.addEventListener('submit', function(e) {
-        if (!validateLunch()) {
-            e.preventDefault();
-        }
-    });
+    const form = document.querySelector('.order-form');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            if (!validateLunch()) {
+                e.preventDefault();
+                return;
+            }
+
+            //  Добавляем выбранные блюда в форму как hidden-поля
+            this.querySelectorAll('input[type="hidden"][name^="dish_"], input[name="total_price"]')
+                .forEach(el => el.remove());
+
+            Object.keys(selectedDishes).forEach(cat => {
+                const dish = selectedDishes[cat];
+                if (dish) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = `dish_${cat}`;
+                    input.value = `${dish.name} (${dish.price} ₽)`;
+                    this.appendChild(input);
+                }
+            });
+
+            const total = Object.values(selectedDishes)
+                .filter(Boolean)
+                .reduce((sum, d) => sum + d.price, 0);
+
+            const totalInput = document.createElement('input');
+            totalInput.type = 'hidden';
+            totalInput.name = 'total_price';
+            totalInput.value = total;
+            this.appendChild(totalInput);
+
+            //форма отправится со всем заказом
+        });
+    }
 });
