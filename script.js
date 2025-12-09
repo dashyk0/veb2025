@@ -39,7 +39,7 @@ async function loadDishes() {
 
         const data = await response.json();
 
-        // Приводим данные к нужному формату (если API отдаёт не совсем как раньше)
+        // Приводим данные к нужному формату 
         dishes = data.map(dish => ({
             keyword: dish.keyword,
             name: dish.name,
@@ -59,7 +59,7 @@ async function loadDishes() {
     }
 }
 
-// === Остальные функции (без изменений, только мелкие правки под динамические данные) ===
+
 
 function displayDishes() {
     const categories = ['soup', 'main', 'drink', 'salad', 'dessert'];
@@ -272,3 +272,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
