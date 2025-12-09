@@ -203,3 +203,19 @@ footer a:hover {
     margin-bottom: 25px;
     font-weight: 700;
 }
+/* Адаптация таблицы для телефонов */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    table {
+        min-width: 600px;
+    }
+
+    th, td {
+        padding: 12px 10px;
+        font-size: 15px;
+    }
+}
